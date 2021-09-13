@@ -15,7 +15,7 @@
   <input type="submit" value="Сортировать" class="btn btn-primary mb-3">
   <a href="{{route('books.index')}}" class="btn btn-primary mb-3">Сбросить</a>
 </form>
-@if(!$books->count())
+@if(!$books->count()  && !empty($selectedAuth))
   <h3 class="mb-3">Книг автора "{{$selectedAuth->FIO}}" не найдено</h3>
  @else
 <h3 class="mb-3"> {{isset($selectedAuth) ? 'Книги автора "'.$selectedAuth->FIO.'"' : null}}</h3>

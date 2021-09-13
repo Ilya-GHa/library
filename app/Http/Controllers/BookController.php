@@ -14,18 +14,32 @@ class BookController extends Controller
      * Display a listing of the resource.
      * 
      * @return \Illuminate\Http\Response
+     * 
      */
+
+
+
     public function index(Request $request)
     {
+
         $author = Author::find($request->author);
-        // dd($author->books);
 
 
+        function getAuthor()
+        {
+            if (request()->filled('author')) {
+               return $author_id = request()->author;
+            }
+        };
 
         if ($request->filled('author')) {
+            
+            $bookQuery = Book::whereHas('authors', function ($q) {
 
-            $bookQuery = $author->books;
-            // dd($bookQuery);
+                $q->where('author_id', getAuthor()); //this refers id field from categories table
+
+            })
+                ->get();
 
         } else {
             $bookQuery = Book::get();
@@ -157,47 +171,41 @@ class BookController extends Controller
 
                         $book->authors()->attach($request->authors[$y]);
                     }
-
-                    
                 }
             }
             $related_authors = $book->authors()->get();
             foreach ($related_authors as $related_author) {
-               $count=0;
+                $count = 0;
                 for ($y = 0; $y < $length_selected_authors; $y++) {
                     if ($request->authors[$y] == $related_author->id) {
                         // $book->authors()->detach($related_author->id);
                         $count++;
-
                     }
-                   $res= $request->authors[$y] != $related_author->id?'true':'false';
+                    $res = $request->authors[$y] != $related_author->id ? 'true' : 'false';
                     // echo " Автор из реквеста: " . $request->authors[$y] . " Автор привязанный: " . $related_author->id . " Результат -> ".$res.'<br>';
-                    
-                    
-                  
+
+
+
                 }
                 // echo "ITOG: ".$count."<br>";
-                if($count==0){
+                if ($count == 0) {
                     // dd($related_author->quantity);
-                    $related_author->quantity-=1;
+                    $related_author->quantity -= 1;
                     $related_author->save();
                     $book->authors()->detach($related_author->id);
-                    
                 }
 
                 //  dd($related_author->quantity);
             }
             // dd($res);
-            
-        } 
-        else{
+
+        } else {
             $related_authors = $book->authors()->get();
             foreach ($related_authors as $related_author) {
-            $related_author->quantity-=1;
-            $related_author->save();
+                $related_author->quantity -= 1;
+                $related_author->save();
             }
             $book->authors()->detach();
-
         }
         return redirect()->route('books.index', $book);
     }
